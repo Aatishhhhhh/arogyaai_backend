@@ -1,4 +1,6 @@
 fastapi
-uvicorn
+uvicorn[standard]
 pydantic
+pydantic-settings
 nltk
+httpx
