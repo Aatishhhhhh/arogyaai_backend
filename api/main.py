@@ -17,6 +17,7 @@ if PROJECT_ROOT not in sys.path:
     )
 # THIRD-PARTY IMPORTS
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 # PROJECT IMPORTS
 from engine.pipeline import pipeline
@@ -44,6 +45,31 @@ app = FastAPI(
     title="Arogya AI Backend",
     description="Prototype backend for Arogya AI",
     version="0.1.0"
+)
+
+# Allow the deployed Arogya AI frontend to call the legacy
+# keyword-matching API. Override/extend origins through FRONTEND_ORIGINS.
+configured_origins = os.getenv("FRONTEND_ORIGINS", "")
+origins = [
+    origin.strip().rstrip("/")
+    for origin in configured_origins.split(",")
+    if origin.strip()
+]
+origins.extend([
+    "https://arogya-ai-frontend-nine.vercel.app",
+    "http://localhost:5500",
+    "http://127.0.0.1:5500",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+])
+origins = list(dict.fromkeys(origins))
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization"],
 )
 # IN-MEMORY SESSION STORE
 #
